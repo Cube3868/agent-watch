@@ -1,0 +1,21 @@
+{
+  "name": "agent-watch",
+  "version": "0.1.0",
+  "description": "A live dashboard of what your AI coding agents (Claude Code, Codex) are doing right now. Local, read-only.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "repository": "github:Cube3868/agent-watch",
+  "keywords": ["claude-code", "codex", "ai-agents", "dashboard", "bun"],
+  "engines": {
+    "bun": ">=1.1"
+  },
+  "scripts": {
+    "start": "bun server.ts",
+    "demo": "bun server.ts --demo",
+    "film": "python launch/bed.py && bun launch/record.ts"
+  },
+  "devDependencies": {
+    "playwright-core": "1.48.2"
+  }
+}

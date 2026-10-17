@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Watch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#f6f2ff; --dim:rgba(255,255,255,.66); --faint:rgba(255,255,255,.4);
+  --pink:#ff7ac6; --mint:#5ef2c4; --sky:#6cc8ff; --sun:#ffd166; --grape:#b98cff; --peach:#ff9f6e; --lime:#c6f36b; --coral:#ff6e8a;
+  --font:"Space Grotesk";
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#0a0816;color:var(--ink);font-family:var(--font),system-ui,sans-serif;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.blobs{position:fixed;inset:0;z-index:-1;overflow:hidden;filter:blur(70px) saturate(140%)}
+.blob{position:absolute;border-radius:50%;opacity:.85;mix-blend-mode:screen;animation:drift 22s ease-in-out infinite alternate}
+.b1{width:520px;height:520px;background:#ff4fb0;left:-120px;top:-80px}
+.b2{width:460px;height:460px;background:#3a7bff;right:-100px;top:60px;animation-duration:26s;animation-delay:-6s}
+.b3{width:420px;height:420px;background:#22e0b0;left:30%;top:45%;animation-duration:30s;animation-delay:-12s}
+.b4{width:380px;height:380px;background:#ffb347;right:12%;bottom:-120px;animation-duration:24s;animation-delay:-3s}
+.b5{width:340px;height:340px;background:#9b5cff;left:8%;bottom:-60px;animation-duration:28s;animation-delay:-9s}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(120px,80px) scale(1.15)}100%{transform:translate(-60px,140px) scale(.9)}}
+
+header{display:flex;align-items:center;gap:14px;padding:22px 28px 6px;flex-wrap:wrap}
+.logo{width:42px;height:42px;border-radius:50%;background:conic-gradient(var(--pink),var(--sun),var(--mint),var(--sky),var(--grape),var(--pink));animation:spin 8s linear infinite;box-shadow:0 0 24px #ff7ac655;flex:none}
+.logo::after{content:"";display:block;width:26px;height:26px;margin:8px;border-radius:50%;background:rgba(10,8,22,.75)}
+@keyframes spin{to{transform:rotate(360deg)}}
+h1{font-size:26px;margin:0;font-weight:700;letter-spacing:-.2px}
+.sub{color:var(--dim);font-size:13px;display:flex;align-items:center;gap:6px}
+.live{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 10px var(--mint)}
+.live.off{background:var(--coral);box-shadow:0 0 10px var(--coral)}
+.pills{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.pill,.fontbtn{padding:6px 12px;border-radius:999px;font:inherit;font-size:13px;color:var(--dim);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.pill b{color:var(--ink)}
+.fontbtn{cursor:pointer;color:var(--ink)}
+.fontbtn:hover{background:rgba(255,255,255,.2)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(370px,1fr));gap:18px;padding:18px 28px 40px;align-items:start}
+.card{--c:var(--sky);position:relative;border-radius:32px;padding:16px 16px 14px;overflow:hidden;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--c) 30%,rgba(255,255,255,.14)),rgba(255,255,255,.04) 50%,color-mix(in srgb,var(--c) 14%,rgba(255,255,255,.06)));
+  -webkit-backdrop-filter:blur(28px) saturate(190%);backdrop-filter:blur(28px) saturate(190%);
+  border:1px solid rgba(255,255,255,.26);
+  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(255,255,255,.1),inset 0 0 40px color-mix(in srgb,var(--c) 18%,transparent),0 24px 60px rgba(5,0,25,.5);
+  transition:transform .3s,box-shadow .3s,opacity .5s,filter .5s;animation:pop .55s cubic-bezier(.2,1.4,.4,1) both}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(120% 60% at 15% -10%,rgba(255,255,255,.35),transparent 45%),radial-gradient(80% 50% at 110% 120%,color-mix(in srgb,var(--c) 40%,transparent),transparent 60%)}
+.card::after{content:"";position:absolute;top:-60%;left:-50%;width:40%;height:220%;transform:rotate(25deg);pointer-events:none;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);animation:sheen 7s ease-in-out infinite}
+.card.idle::after,.card.done::after{animation:none}
+@keyframes sheen{0%,60%{left:-50%}100%{left:130%}}
+@keyframes pop{from{opacity:0;transform:scale(.92) translateY(12px)}}
+.card>*{position:relative;z-index:1}
+.card:hover{transform:translateY(-4px);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6),0 30px 70px rgba(5,0,25,.55),0 0 0 4px color-mix(in srgb,var(--c) 25%,transparent)}
+.card.done{opacity:.8;filter:saturate(.7)}
+.card.helper{border-radius:26px;padding:12px 14px}
+.card.helper .feed{height:96px}
+.top{display:flex;align-items:center;gap:10px}
+.av{width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:20px;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.7),color-mix(in srgb,var(--c) 60%,transparent) 55%);border:1px solid rgba(255,255,255,.5);box-shadow:0 6px 16px color-mix(in srgb,var(--c) 40%,transparent)}
+.helper .av{width:30px;height:30px;font-size:15px}
+.who{min-width:0}
+.name{font-weight:600;font-size:17px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.helper .name{font-size:14px}
+.kind{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.state{margin-left:auto;flex:none;display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--faint);flex:none}
+.working .state .dot,.kid.working .dot{background:var(--mint);animation:pulse 1.4s infinite}
+.idle .state .dot,.kid.idle .dot{background:var(--sun)}
+.done .state .dot,.kid.done .dot{background:var(--grape)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 #5ef2c488}100%{box-shadow:0 0 0 10px #5ef2c400}}
+.doing{margin:10px 2px 8px;font-size:13.5px;color:var(--dim);display:flex;gap:8px;justify-content:space-between}
+.doing span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.ago{color:var(--faint);flex:none;font-size:12px}
+.feed{position:relative;background:rgba(10,6,30,.45);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 2px 10px rgba(0,0,0,.35);border-radius:18px;padding:10px 12px;height:172px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;font:12px/1.55 "JetBrains Mono",ui-monospace,monospace}
+.feed::before{content:"";position:absolute;left:0;right:0;top:0;height:38%;background:linear-gradient(rgba(14,9,36,.92),transparent);z-index:2;pointer-events:none;border-radius:18px 18px 0 0}
+.ln{white-space:pre-wrap;word-break:break-word;animation:slide .35s ease-out both;flex:none}
+@keyframes slide{from{opacity:0;transform:translateY(8px)}}
+.cmd{color:color-mix(in srgb,var(--c) 70%,#fff)} .cmd::before{content:"❯ ";opacity:.7}
+.bg{color:color-mix(in srgb,var(--c) 45%,#ddd)} .bg::before{content:"⟳ ";opacity:.7}
+.out{color:rgba(255,255,255,.72)}
+.err{color:#ff9aaa}
+.say{color:var(--ink);font-family:var(--font),sans-serif;font-size:12.5px}
+.in{color:var(--sun);font-family:var(--font),sans-serif;font-size:12.5px}
+.add{color:#86f5b2} .del{color:#ff9aaa} .file{color:var(--sun)}
+.ln .red{background:rgba(255,122,198,.22);color:var(--pink);border-radius:5px;padding:0 4px}
+.imgs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.img{aspect-ratio:1;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 8px 20px rgba(0,0,0,.3);background:rgba(255,255,255,.08);cursor:zoom-in}
+.img img{width:100%;height:100%;object-fit:cover;display:block;animation:fade 1.2s ease both}
+@keyframes fade{from{opacity:0;filter:blur(14px);transform:scale(1.08)}}
+.render{margin-top:10px;background:rgba(10,6,30,.45);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:12px}
+.rtop{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--dim);margin-bottom:8px;gap:8px}
+.rtop span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rtop b{color:var(--ink);font-size:22px;font-weight:700}
+.bar{height:24px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.4)}
+.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--pink),var(--peach),var(--sun));position:relative;transition:width .6s cubic-bezier(.3,1.3,.5,1);box-shadow:0 0 20px #ff9f6eaa,inset 0 2px 0 rgba(255,255,255,.5)}
+.fill::after{content:"";position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(45deg,rgba(255,255,255,.22) 0 10px,transparent 10px 20px);background-size:28px 28px;animation:stripes 1s linear infinite}
+.fill.indet{width:35%!important;animation:indet 1.6s ease-in-out infinite}
+@keyframes indet{0%{transform:translateX(-100%)}100%{transform:translateX(290%)}}
+@keyframes stripes{to{background-position:28px 0}}
+.rdone .fill{background:linear-gradient(90deg,var(--mint),var(--sky));box-shadow:0 0 16px #5ef2c488}
+.frame{margin-top:8px;font-size:12px;color:var(--dim);font-family:"JetBrains Mono",monospace}
+.kids{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.kid{font-size:12px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);display:flex;align-items:center;gap:6px;max-width:100%}
+.kid span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kid .dot{width:7px;height:7px}
+.empty{grid-column:1/-1;text-align:center;padding:60px 20px;border-radius:32px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);color:var(--dim);font-size:18px}
+.empty b{display:block;font-size:26px;color:var(--ink);margin-bottom:6px}
+.lightbox{position:fixed;inset:0;background:rgba(5,3,15,.7);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);display:none;place-items:center;z-index:50;cursor:zoom-out;padding:24px}
+.lightbox.on{display:grid}
+.lightbox img{max-width:100%;max-height:90vh;border-radius:24px;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:fade .5s ease both}
+footer{color:var(--faint);font-size:12px;text-align:center;padding:0 16px 30px}
+
+/* ---- hierarchy pass: color belongs to the agent, state decides loudness ---- */
+.blobs{filter:blur(90px) saturate(120%)}
+.blob{opacity:.62;animation-duration:48s}
+.b2{animation-duration:56s}.b3{animation-duration:62s}.b4{animation-duration:52s}.b5{animation-duration:58s}
+.card{
+  background:linear-gradient(160deg,color-mix(in srgb,var(--c) 52%,rgba(30,22,58,.42)),color-mix(in srgb,var(--c) 14%,rgba(16,11,34,.5)) 70%);
+  -webkit-backdrop-filter:blur(30px) saturate(150%);backdrop-filter:blur(30px) saturate(150%);
+  border:1px solid color-mix(in srgb,var(--c) 40%,rgba(255,255,255,.16));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 18px 44px rgba(4,0,20,.5)}
+.card::before{background:radial-gradient(110% 55% at 12% -12%,rgba(255,255,255,.22),transparent 45%)}
+.card::after{animation-duration:11s}
+.card:hover{transform:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 18px 44px rgba(4,0,20,.5),0 0 0 3px color-mix(in srgb,var(--c) 30%,transparent)}
+.card.working{box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 0 0 1px color-mix(in srgb,var(--c) 55%,transparent),0 20px 60px color-mix(in srgb,var(--c) 28%,rgba(4,0,20,.5))}
+.name{letter-spacing:-.2px}
+.state{background:rgba(0,0,0,.22);border-color:rgba(255,255,255,.14)}
+.working .state{color:var(--mint)}
+
+.shelf{padding:0 28px}
+.shelf[hidden]{display:none}
+.shelf h2{display:flex;align-items:center;gap:8px;margin:22px 0 0;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+#shelf-working h2 .dot{background:var(--mint);animation:pulse 1.4s infinite}
+#shelf-idle h2 .dot{background:var(--sun)}
+#shelf-helpers h2 .dot{background:var(--sky)}
+#grid-helpers .card{background:linear-gradient(160deg,color-mix(in srgb,var(--c) 30%,rgba(22,16,44,.5)),rgba(16,11,34,.5) 70%)}
+#grid-helpers .feed .ln:not(:nth-last-child(-n+3)){display:none}
+#grid-helpers .feed{height:auto;max-height:84px}
+#shelf-done h2 .dot{background:var(--grape)}
+.shelf .grid{padding:12px 0 8px}
+#grid{align-items:start}
+
+.feed{height:190px}
+.feed::before{height:22%}
+.say,.in{font-size:13.5px;line-height:1.45;margin-top:5px}
+.say{color:#fff}
+.out,.bg{opacity:.75}
+
+/* waiting: smaller, quieter, just the gist */
+.compact{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.compact .card{padding:12px 14px;border-radius:24px;background:linear-gradient(160deg,color-mix(in srgb,var(--c) 18%,rgba(22,16,44,.55)),rgba(16,11,34,.55) 70%);border-color:rgba(255,255,255,.12)}
+.compact .card::after{display:none}
+.compact .av{width:30px;height:30px;font-size:15px}
+.compact .name{font-size:15px}
+.compact .feed{height:auto;max-height:64px;padding:8px 10px;border-radius:14px}
+.compact .feed::before{display:none}
+.compact .feed .ln:not(:nth-last-child(-n+2)){display:none}
+.compact .imgs{grid-template-columns:repeat(6,1fr);gap:6px}
+.compact .img{border-radius:10px}
+.compact .render{padding:8px 10px}
+
+/* finished: small tiles */
+.tiles{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.tiles .card{padding:10px 12px;border-radius:20px;opacity:.78;filter:saturate(.75);background:rgba(20,14,40,.5);border-color:rgba(255,255,255,.1);box-shadow:0 10px 24px rgba(4,0,20,.4)}
+.tiles .card:hover{opacity:1;filter:none}
+.tiles .card::after{display:none}
+.tiles .av{width:26px;height:26px;font-size:13px}
+.tiles .name{font-size:13.5px}
+.tiles .kind{font-size:11px}
+.tiles .state{display:none}
+.tiles .doing{margin:6px 0 0;font-size:12px}
+.tiles .feed,.tiles .kids,.tiles .render{display:none}
+.tiles .imgs{grid-template-columns:repeat(4,1fr);gap:5px;margin-top:8px}
+.tiles .img{border-radius:9px}
+@media (max-width:480px){.shelf{padding:0 16px}}
+
+/* ---- anatomy pass: one big sentence, one plain line, a quiet code ticker; no boxes in boxes ---- */
+.blob{opacity:.8}
+.shelf .grid{gap:22px}
+.card{
+  background:linear-gradient(155deg,color-mix(in srgb,var(--c) 42%,rgba(255,255,255,.16)) 0%,color-mix(in srgb,var(--c) 12%,rgba(255,255,255,.06)) 55%,rgba(255,255,255,.04) 100%);
+  -webkit-backdrop-filter:blur(34px) saturate(170%);backdrop-filter:blur(34px) saturate(170%);
+  border:1px solid rgba(255,255,255,.3);
+  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6),inset 0 -12px 30px rgba(0,0,0,.12),0 20px 50px rgba(4,0,20,.38)}
+.card.working{box-shadow:inset 0 1.5px 0 rgba(255,255,255,.65),inset 0 -12px 30px rgba(0,0,0,.12),0 0 0 1px color-mix(in srgb,var(--c) 60%,transparent),0 22px 60px color-mix(in srgb,var(--c) 32%,rgba(4,0,20,.4))}
+.card::before{background:radial-gradient(120% 70% at 10% -20%,rgba(255,255,255,.4),transparent 50%)}
+.av{font-size:14px;font-weight:700;letter-spacing:-.5px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35);
+  background:radial-gradient(circle at 30% 25%,color-mix(in srgb,var(--c) 40%,#fff),var(--c) 60%,color-mix(in srgb,var(--c) 60%,#000));border:1px solid rgba(255,255,255,.55)}
+.doing{margin:14px 2px 4px;align-items:baseline}
+.doing span:first-child{font-size:19px;font-weight:600;line-height:1.25;letter-spacing:-.3px;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.said{margin:2px 2px 10px;font-size:13.5px;line-height:1.45;color:rgba(255,255,255,.78);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;animation:slide .4s ease-out both}
+.said.in{color:var(--sun)}
+.feed{height:auto;background:none;border:0;box-shadow:none;padding:8px 2px 0;border-top:1px solid rgba(255,255,255,.14);border-radius:0;font-size:11.5px;line-height:1.6;-webkit-mask:linear-gradient(transparent,#000 45%);mask:linear-gradient(transparent,#000 45%)}
+.feed::before{display:none}
+.feed .ln{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.feed[hidden]{display:none}
+.render{background:rgba(0,0,0,.18);border:0}
+.kid{background:rgba(0,0,0,.18);border-color:rgba(255,255,255,.14)}
+.compact .feed,#grid-helpers .feed{display:none}
+.compact .doing span:first-child{font-size:15px}
+.compact .said{font-size:12.5px;margin-bottom:4px}
+.tiles .said{display:none}
+.tiles .doing span:first-child{font-size:12px;font-weight:500}
+.tiles .av{font-size:10px}
+
+/* ---- palettes: agent colors, backdrop and status colors move together ---- */
+:root{--bg:#0a0816;--s-work:#5ef2c4;--s-idle:#ffd166;--s-done:#b98cff;
+  --blob1:#ff4fb0;--blob2:#3a7bff;--blob3:#22e0b0;--blob4:#ffb347;--blob5:#9b5cff}
+/* Aurora: cool and analogous, deep navy, teal to violet */
+:root[data-palette="aurora"]{--bg:#060b1a;
+  --pink:#a78bfa;--mint:#5eead4;--sky:#7dd3fc;--sun:#93c5fd;--grape:#c4b5fd;--peach:#67e8f9;--lime:#6ee7b7;--coral:#818cf8;
+  --s-work:#5eead4;--s-idle:#fbbf77;--s-done:#94a3b8;
+  --blob1:#4338ca;--blob2:#0e7490;--blob3:#0d9488;--blob4:#6d28d9;--blob5:#1d4ed8}
+/* Sunset: warm and analogous, plum night, rose to amber */
+:root[data-palette="sunset"]{--bg:#140a14;
+  --pink:#fb7185;--mint:#fda4af;--sky:#f9a8d4;--sun:#fcd34d;--grape:#e879f9;--peach:#fdba74;--lime:#fde68a;--coral:#f472b6;
+  --s-work:#86efac;--s-idle:#fcd34d;--s-done:#a8a29e;
+  --blob1:#be185d;--blob2:#7c2d12;--blob3:#9d174d;--blob4:#b45309;--blob5:#6b21a8}
+/* Frost: almost no color; frosted white glass on slate, color only where it means something */
+:root[data-palette="frost"]{--bg:#0d1117;
+  --pink:#cbd5e1;--mint:#d1d5db;--sky:#e2e8f0;--sun:#e5e7eb;--grape:#d4d4d8;--peach:#e7e5e4;--lime:#d6d3d1;--coral:#cbd5e1;
+  --s-work:#4ade80;--s-idle:#facc15;--s-done:#71717a;
+  --blob1:#334155;--blob2:#1e3a5f;--blob3:#3f3f46;--blob4:#1f2937;--blob5:#312e81}
+:root[data-palette="frost"] .card{background:linear-gradient(155deg,rgba(255,255,255,.14),rgba(255,255,255,.05) 60%)}
+:root[data-palette="frost"] .card.working{box-shadow:inset 0 1.5px 0 rgba(255,255,255,.55),0 0 0 1px rgba(74,222,128,.45),0 22px 60px rgba(0,0,0,.45)}
+:root[data-palette="frost"] .av{background:radial-gradient(circle at 30% 25%,#fff,#94a3b8 70%);color:#0f172a;text-shadow:none}
+body{background:var(--bg)}
+.b1{background:var(--blob1)}.b2{background:var(--blob2)}.b3{background:var(--blob3)}.b4{background:var(--blob4)}.b5{background:var(--blob5)}
+.working .state .dot,.kid.working .dot,#shelf-working h2 .dot,.live{background:var(--s-work)}
+.working .state{color:var(--s-work)}
+.idle .state .dot,.kid.idle .dot,#shelf-idle h2 .dot{background:var(--s-idle)}
+.done .state .dot,.kid.done .dot,#shelf-done h2 .dot{background:var(--s-done)}
+.live{box-shadow:0 0 10px var(--s-work)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--s-work) 55%,transparent)}100%{box-shadow:0 0 0 10px transparent}}
+.fill{background:linear-gradient(90deg,var(--pink),var(--sky),var(--mint));box-shadow:0 0 18px color-mix(in srgb,var(--sky) 55%,transparent),inset 0 2px 0 rgba(255,255,255,.5)}
+.rdone .fill{background:var(--s-work)}
+
+/* ---- calm: nothing loops. Only real changes move, and gently. ---- */
+.blob,.logo,.card::after,.fill::after,.working .state .dot,.kid.working .dot,#shelf-working h2 .dot{animation:none!important}
+.card::after{display:none}
+.card{animation:none}
+.ln,.said{animation:appear .25s ease-out both}
+@keyframes appear{from{opacity:0}}
+.img img{animation:appear .6s ease-out both}
+.fill{transition:width 1s ease}
+.fill.indet{width:100%!important;animation:breathe 2.4s ease-in-out infinite;opacity:.55}
+@keyframes breathe{50%{opacity:.25}}
+.card:hover{transform:none}
+
+/* ---- steady: every part of a bubble has a fixed height, so new text never pushes others around ---- */
+.doing{height:calc(2 * 1.25em + 2px)}
+.doing span:first-child{line-height:1.25}
+.said,.said[hidden]{display:-webkit-box!important;height:calc(2 * 1.45em);visibility:visible}
+.said[hidden]{visibility:hidden}
+.feed,.feed[hidden]{display:block!important;height:calc(5 * 1.6em + 8px);overflow:hidden}
+.feed[hidden]{visibility:hidden}
+.kids{height:26px;overflow:hidden;flex-wrap:nowrap}
+.kids[hidden]{display:flex!important;visibility:hidden}
+.kid{flex:none;max-width:60%}
+.compact .doing{height:calc(2 * 1.25em + 2px)}
+.compact .said,.compact .said[hidden]{height:calc(2 * 1.45em)}
+.compact .feed,.compact .feed[hidden],#grid-helpers .feed{display:none!important}
+.compact .kids{display:none!important}
+.tiles .doing{height:1.4em}
+.tiles .said,.tiles .feed,.tiles .kids,.tiles .render{display:none!important}
+.tiles .imgs,.tiles .imgs[hidden]{display:grid!important;height:calc((230px - 24px) / 4)}
+@media (max-width:480px){.grid{padding:12px 16px 30px;grid-template-columns:1fr}header{padding:18px 16px 4px}.pills{margin-left:0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+<header>
+  <div class="logo"></div>
+  <div><h1>Agent Watch</h1><div class="sub"><span class="live off" id="live"></span><span id="liveText">connecting…</span></div></div>
+  <div class="pills">
+    <span class="pill"><b id="nWork">0</b> working</span><span class="pill"><b id="nIdle">0</b> idle</span><span class="pill"><b id="nDone">0</b> finished</span>
+    <button class="fontbtn" id="palBtn" title="Change the colors">◐ Aurora</button>
+    <button class="fontbtn" id="fontBtn" title="Change the font">Aa · Space Grotesk</button>
+  </div>
+</header>
+<main>
+  <section class="shelf" id="shelf-working"><h2><span class="dot"></span>Working now</h2><div class="grid" id="grid"></div></section>
+  <section class="shelf" id="shelf-helpers"><h2><span class="dot"></span>Helpers at work</h2><div class="grid compact" id="grid-helpers"></div></section>
+  <section class="shelf" id="shelf-idle"><h2><span class="dot"></span>Waiting</h2><div class="grid compact" id="grid-idle"></div></section>
+  <section class="shelf" id="shelf-done"><h2><span class="dot"></span>Finished recently</h2><div class="grid tiles" id="grid-done"></div></section>
+</main>
+<footer>Reads your Claude Code and Codex logs on this computer only. Anything that looks like a password or key is blanked out.</footer>
+<div class="lightbox" id="lb"><img id="lbImg" alt=""></div>
+<script>
+const FONTS = ["Space Grotesk", "Sora", "Outfit", "Syne"];
+let fontIx = 0;
+try { fontIx = Math.max(0, FONTS.indexOf(localStorage.getItem("aw-font") || "Space Grotesk")); } catch {}
+const applyFont = () => { document.documentElement.style.setProperty("--font", `"${FONTS[fontIx]}"`); document.getElementById("fontBtn").textContent = "Aa · " + FONTS[fontIx]; };
+applyFont();
+const PALETTES = [["aurora", "Aurora"], ["sunset", "Sunset"], ["frost", "Frost"], ["candy", "Candy"]];
+let palIx = 0;
+try { palIx = Math.max(0, PALETTES.findIndex(([k]) => k === (localStorage.getItem("aw-palette") || "aurora"))); } catch {}
+const applyPal = () => { document.documentElement.dataset.palette = PALETTES[palIx][0]; document.getElementById("palBtn").textContent = "◐ " + PALETTES[palIx][1]; };
+applyPal();
+document.getElementById("palBtn").onclick = () => { palIx = (palIx + 1) % PALETTES.length; applyPal(); try { localStorage.setItem("aw-palette", PALETTES[palIx][0]); } catch {} };
+document.getElementById("fontBtn").onclick = () => { fontIx = (fontIx + 1) % FONTS.length; applyFont(); try { localStorage.setItem("aw-font", FONTS[fontIx]); } catch {} };
+
+const grid = document.getElementById("grid");
+const SHELF = { working: grid, idle: document.getElementById("grid-idle"), done: document.getElementById("grid-done"), helpers: document.getElementById("grid-helpers") };
+// What the page shows lags the raw state: a bubble stays "working" for a while after its last
+// working moment, so an agent pausing between steps doesn't hop shelves.
+const HOLD_MS = 90_000;
+let seq = 0;
+function settle(a, c) {
+  const now = Date.now();
+  if (a.state === "working") { c.shown = "working"; c.hold = now + HOLD_MS; }
+  else if (!c.hold || now >= c.hold) c.shown = a.state;
+}
+const shownState = (a) => cards.get(a.id)?.shown ?? a.state;
+const shelfOf = (a) => (a.kind === "helper" && shownState(a) !== "done" ? "helpers" : shownState(a));
+function place(a, c) {
+  settle(a, c);
+  const el = c.el;
+  el.className = `card ${c.shown}${a.kind === "helper" ? " helper" : ""}`;
+  const shelf = SHELF[shelfOf(a)];
+  if (el.parentElement !== shelf) shelf.appendChild(el);
+  el.querySelector(".st").textContent = LABEL[c.shown];
+}
+// raw machine output (JSON, escaped strings) is noise on a glance view
+const NOISY = (l) => (l.k === "out" || l.k === "bg") && (/^\s*[\[{]/.test(l.t) || /\\"|\\r\\n|\\n/.test(l.t) || /^\s*[}\]],?\s*$/.test(l.t));
+const cards = new Map();
+const agents = new Map();
+let clockSkew = 0;
+const esc = (s) => String(s).replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
+const mark = (s) => esc(s).replace(/\[(secret hidden|private key hidden|long hex hidden|long blob hidden)\]/g, '<span class="red">$1</span>');
+
+const PALETTE = ["--grape", "--sky", "--pink", "--peach", "--mint", "--sun", "--lime", "--coral"];
+const LOOKS = [
+  [/plan|orchestr|lead/i, "--grape"], [/code|coding|front|back|api|build/i, "--sky"], [/art|design|image|promo/i, "--pink"],
+  [/video|render|music|edit|film/i, "--peach"], [/support|inbox|mail/i, "--mint"], [/doc|write|notes|project/i, "--sun"],
+];
+function look(a) {
+  for (const [re, c] of LOOKS) if (re.test(a.name)) return c;
+  let h = 0; for (const ch of a.id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return PALETTE[h % PALETTE.length];
+}
+const LABEL = { working: "working", idle: "idle", done: "finished" };
+const RANK = { working: 0, idle: 1, done: 2 };
+function ago(t) {
+  const s = Math.max(0, Math.round((Date.now() - clockSkew - t) / 1000));
+  if (s < 10) return "just now"; if (s < 60) return s + "s ago"; if (s < 3600) return Math.round(s / 60) + "m ago"; return Math.round(s / 3600) + "h ago";
+}
+
+function build(a) {
+  const el = document.createElement("section");
+  el.innerHTML = `<div class="top"><div class="av"></div><div class="who"><div class="name"></div><div class="kind"></div></div><div class="state"><span class="dot"></span><span class="st"></span></div></div>
+    <div class="doing"><span></span><span class="ago"></span></div><div class="said" hidden></div><div class="feed"></div><div class="imgs" hidden></div><div class="render" hidden></div><div class="kids" hidden></div>`;
+  return { el, lastLine: 0, imgs: new Set(), seq: ++seq, shown: a.state, hold: 0 };
+}
+
+function update(a) {
+  agents.set(a.id, a);
+  let c = cards.get(a.id);
+  if (!c) { c = build(a); cards.set(a.id, c); }
+  const el = c.el;
+  const color = look(a);
+  place(a, c);
+  el.style.setProperty("--c", `var(${color})`);
+  el.style.order = String(c.seq); // fixed: a bubble keeps its spot; new ones join at the end
+  const words = a.name.replace(/^(Codex in|Builder:)\s*/i, "").split(/\s+/).filter((w) => /^\w/.test(w));
+  el.querySelector(".av").textContent = (a.kind === "codex" ? "Cx" : ((words[0]?.[0] ?? "?") + (words[1]?.[0] ?? "")).toUpperCase());
+  el.querySelector(".name").textContent = a.name;
+  el.querySelector(".name").title = a.name;
+  const parent = a.parent && agents.get(a.parent);
+  el.querySelector(".kind").textContent = a.kind === "helper" && parent ? `${a.sub} · for ${parent.name}` : a.sub;
+  el.querySelector(".doing span").textContent = c.shown === "done" ? "Finished" : a.doing || (c.shown === "idle" ? "Waiting" : "Working…");
+  el.querySelector(".ago").textContent = ago(a.last);
+  const feed = el.querySelector(".feed");
+  for (const l of a.lines) {
+    if (l.id <= c.lastLine) continue;
+    c.lastLine = l.id;
+    if (NOISY(l)) continue;
+    if (l.k === "say" || l.k === "in") { // sentences get their own line in plain words, not the code ticker
+      const s = el.querySelector(".said");
+      s.innerHTML = mark(l.t.replace(/[*`]/g, "")); s.className = "said " + l.k; s.hidden = false;
+      s.style.animation = "none"; void s.offsetWidth; s.style.animation = "";
+      continue;
+    }
+    const d = document.createElement("div");
+    d.className = "ln " + l.k; d.innerHTML = mark(l.t);
+    feed.appendChild(d); c.lastLine = l.id;
+  }
+  while (feed.children.length > 5) feed.firstChild.remove();
+  feed.hidden = !feed.children.length;
+  const imgs = el.querySelector(".imgs");
+  for (const im of a.images) {
+    if (c.imgs.has(im.key)) continue;
+    c.imgs.add(im.key);
+    const box = document.createElement("div"); box.className = "img"; box.title = im.name;
+    const img = new Image(); img.src = im.src || "/img/" + im.key; img.alt = im.name; img.loading = "lazy";
+    box.appendChild(img); box.onclick = () => { document.getElementById("lbImg").src = img.src; document.getElementById("lb").classList.add("on"); };
+    imgs.appendChild(box);
+  }
+  while (imgs.children.length > 4) { imgs.firstChild.remove(); }
+  imgs.hidden = !imgs.children.length;
+  const r = el.querySelector(".render");
+  const showRender = a.render && (!a.render.done || Date.now() - clockSkew - a.render.t < 10 * 60_000);
+  r.hidden = !showRender;
+  if (showRender) {
+    const pct = a.render.pct;
+    r.className = "render" + (a.render.done ? " rdone" : "");
+    r.innerHTML = `<div class="rtop"><span>${esc(a.render.label)}</span><b>${pct == null ? "…" : Math.floor(pct) + "%"}</b></div>
+      <div class="bar"><div class="fill${pct == null && !a.render.done ? " indet" : ""}" style="width:${pct == null ? (a.render.done ? 100 : 35) : pct}%"></div></div>
+      <div class="frame">${esc(a.render.done && pct == null ? "done" : a.render.detail)}</div>`;
+  }
+  renderKids();
+  counts();
+}
+
+function renderKids() {
+  for (const [id, c] of cards) {
+    const a = agents.get(id); if (!a || a.kind === "helper") continue;
+    const kids = [...agents.values()].filter((k) => k.parent === id);
+    const box = c.el.querySelector(".kids");
+    box.hidden = !kids.length;
+    box.innerHTML = kids.slice(-6).map((k) => `<span class="kid ${k.state}"><span class="dot"></span><span>${esc(k.name)}</span></span>`).join("");
+  }
+}
+
+function remove(id) {
+  const c = cards.get(id); if (c) c.el.remove();
+  cards.delete(id); agents.delete(id); renderKids(); counts();
+}
+
+function counts() {
+  const all = [...agents.values()];
+  document.getElementById("nWork").textContent = all.filter((a) => shownState(a) === "working").length;
+  document.getElementById("nIdle").textContent = all.filter((a) => shownState(a) === "idle").length;
+  document.getElementById("nDone").textContent = all.filter((a) => shownState(a) === "done").length;
+  let empty = document.getElementById("empty");
+  if (!all.length && !empty) { empty = document.createElement("div"); empty.id = "empty"; empty.className = "empty"; empty.innerHTML = "<b>All quiet</b>No agents have done anything in the last few hours."; grid.appendChild(empty); }
+  for (const s of ["working", "helpers", "idle", "done"]) document.getElementById("shelf-" + s).hidden = !all.some((a) => shelfOf(a) === s) && !(s === "working" && !all.length);
+  if (all.length && empty) empty.remove();
+}
+
+function connect() {
+  const es = new EventSource("/events");
+  const live = document.getElementById("live"), txt = document.getElementById("liveText");
+  es.onopen = () => { live.classList.remove("off"); txt.textContent = "live"; };
+  es.onerror = () => { live.classList.add("off"); txt.textContent = "reconnecting…"; };
+  es.onmessage = (e) => {
+    const m = JSON.parse(e.data);
+    if (m.now) clockSkew = Date.now() - m.now;
+    if (m.type === "snapshot") {
+      for (const id of [...cards.keys()]) remove(id);
+      m.agents.forEach((a) => agents.set(a.id, a));
+      m.agents.slice().sort((x, y) => x.name.localeCompare(y.name)).forEach(update); // same order on every load
+      counts();
+    } else if (m.type === "agent") update(m.agent);
+    else if (m.type === "gone") remove(m.id);
+  };
+}
+if (new URLSearchParams(location.search).has("film")) { // frame-by-frame recording: no real-time motion
+  const st = document.createElement("style"); st.textContent = "*,*::before,*::after{animation:none!important;transition:none!important}html{scrollbar-width:none}::-webkit-scrollbar{display:none}"; document.head.appendChild(st);
+}
+if (new URLSearchParams(location.search).has("demo")) {
+  const d = document.createElement("script"); d.src = "/demo.js"; document.body.appendChild(d); // made-up agents, no logs read
+} else connect();
+setInterval(() => {
+  for (const [id, c] of cards) { const a = agents.get(id); if (!a) continue; c.el.querySelector(".ago").textContent = ago(a.last); place(a, c); }
+  renderKids(); counts();
+}, 5000);
+document.getElementById("lb").onclick = () => document.getElementById("lb").classList.remove("on");
+</script>
+</body>
+</html>
